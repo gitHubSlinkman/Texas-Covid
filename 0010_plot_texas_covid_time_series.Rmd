@@ -1,0 +1,108 @@
+---
+title: "Texas Covid Time Series PLots"
+author: "The Covid Project and Craig Slinkman"
+date: "7/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Texas Covid Data Plots
+
+This RMarkdown document plots the time series data provided by 
+[The Covid Project](https://covidtracking.com).
+
+```{r load_packages}
+require(tidyverse)                          # I live in the tidyverse ...
+require(lubridate)                          # For advanced date processing ...
+require( cowplot )                          # For academic plotting ...
+require(formattable)                        # For fixed decimal formatting ...
+```
+ 
+## Load required_functions
+
+```{r load_required functions}
+source('D:/R-Projects/TexasCovid/functions/get_texas_daily_covid_data.R')
+source('D:/R-Projects/TexasCovid/functions/plot_ts.R')
+ 
+```
+
+## Set cowplot as the default theme
+
+
+The default theme in ggplot produces a high ratio of ink to data points.  Therefore, I prefer to use the cowplot theme.  We loaded the theme in load packages chunk but we need to set itn here.
+
+```{r set_cowpllot_as_default}
+
+# Note: As of version 1.0.0, cowplot does not change the default ggplot2 theme
+# anymore. To recover the previous behavior, execute:
+# theme_set(theme_cowplot())
+
+theme_set(theme_cowplot())
+```
+ 
+## Get the Texas Covid data
+
+We read the data from the Covid Project data.
+
+```{r get_daily_covid_data}
+
+###############################################################################
+# We get the covid data using the functions/get_texas_daily_covid_data.
+###############################################################################
+
+texas <- get_texas_daily_covid_data()
+```
+
+## Graphical Analysis of Tests
+
+This section reports the analysis of the Texas testing results.
+
+### Positive tests
+
+#### Definition of a positive test
+
+Total number of people with confirmed OR probable COVID-19 reported by the state or territory (per the expanded CSTE case definition of April 5th, 2020 approved by the CDC). A confirmed case is a person who has a positive test result from an FDA approved diagnostic molecular test. A probable case is a person who either has presentable symptoms WITH epidemiological evidence or has BOTH a positive presumptive laboratory test AND also EITHER presentable symptoms OR epidemiological evidence. Epidemiological evidence refers either to close-proximity contact with a known case or travel history to an area with high disease incidence. According to the guidelines, FDA approved antibody and antigen tests are considered part of presumptive laboratory evidence.
+
+#### Positive plot
+
+```{r plot_positive_cases}
+
+#####################################################################
+# We compute y-axis tick marks.  Noe that the positive case variable is in the
+# third column.
+#####################################################################
+
+variable <- "positive"
+variable_name <- "Cummulative positive tests"
+title   <- "Texas nCovid-19 positive tests"
+
+plot_ts( texas,
+         variable,
+         variable_name,
+         title )
+   
+```
+
+### Negative test cases
+
+#### Definition of negative test
+
+Individuals with a completed viral test that returned a negative result. For states / territories that do not report this number directly, we compute it using one of several methods, depending on which data points the state provides.  
+
+#### Time series plot of negative tests
+
+```{r plot)negative_cases}
+
+variable       <- "negative"
+variable_label <- "Cummulative negative tests"
+title          <- "Texas nCovid-19 negative tests"
+ 
+plot_ts( texas,
+         variable,
+         variable_name,
+         title )
+```
+

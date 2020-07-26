@@ -1,18 +1,25 @@
 # determine_y_axis_sequence.r
 
 determine_y_axis_ticks <- 
-    function( data, j ){
+    function( data, variable ){
         #######################################################################
-        # Pull the j'th column from the tibble.
+        # Pull the variable column from the tibble.
         #######################################################################
-        
         y <- 
             data %>% 
-                pull( j )
+              pull( variable )
+        
+        ##############################################################
+        # Remove missing values by substituting zeros for all 
+        # missing values
+        ##############################################################
+       
+        y <- ifelse( is.na( y ), 0, y )
         
         #######################################################################
         # Determine the maximum value of the j'th column.
         #######################################################################
+        
         max_value <- max( y )
         
         
@@ -47,5 +54,5 @@ determine_y_axis_ticks <-
         seq( from = from_value, 
              by    =   by_value,
              to    = to_value )
-        
     }
+        
