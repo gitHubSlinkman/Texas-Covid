@@ -28,7 +28,8 @@ require( tidyr )                            # To convert wide to longform data
 source('D:/R-Projects/TexasCovid/functions/get_texas_daily_covid_data.R')
 source('D:/R-Projects/TexasCovid/functions/determine_plot_period.R')
 source('D:/R-Projects/TexasCovid/functions/plot_ts.R')
-
+source('D:/R-Projects/TexasCovid/functions/capitalize_strings.R')
+ 
 ```
 
 ## Prepare for plotting
@@ -36,13 +37,39 @@ source('D:/R-Projects/TexasCovid/functions/plot_ts.R')
 
 The default theme in ggplot produces a high ratio of ink to data points.  Therefore, I prefer to use the cowplot theme.  We loaded the theme in load packages chunk but we need to set here.
 
-```{r set_cowpllot_as_default}
+```{r prepare_for_plotting}
 
+#########################################################################################
 # Note: As of version 1.0.0, cowplot does not change the default ggplot2 theme
 # anymore. To recover the previous behavior, execute:
 # theme_set(theme_cowplot())
+#########################################################################################
 
 theme_set(theme_cowplot())
+
+
+##############################################################################
+# We are going to a color blind pallette sugest in Winston's R Cookbook.
+# can find is palette  at http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/.
+# We use the black which is defined below.
+###############################################################################
+ 
+cbbPalette <- c("#000000",  # black
+                "#E69F00",   # University of Texas orange
+                "#009E73",  # Green
+                "#F0E442",   # Yellow
+                "#0072B2",   # Dark blue
+                "#D55E00",   # Firebrick red
+                "#CC79A7 " ) # Pinkish purple
+
+###############################################################################
+# Activate black color blind palette for manual fill and manual points and
+# lines.
+###############################################################################
+
+scale_fill_manual( values = cbbPalette )
+scale_color_manual( values = cbbPalette )
+
 ```
  
 ## Get the Texas Covid data
@@ -131,9 +158,8 @@ Note these value does not include pending tests.
 
 texas <- 
    texas %>% 
-      mutate( all_tests <- positive + negative )  %>% 
-         rename( all_tests = "all_tests <- positive + negative" )
-
+      mutate( all <- positive + negative )  
+        
 variable       <- "all_tests"
 variable_label <-"Cummulative tests"
 title   <- paste( "Texas nCovid-19 tests\n",
@@ -148,24 +174,41 @@ plot_ts( texas,
 ###  Simultaneous overlaid plots of negative tests, positive tests, and all_tests
 
 ```{r plot_all_tests}
-\
-overlaid <- 
-   texas %>% 
-      select( date, positive, negative, all_tests ) %>% 
-         rename( "Date" = "date",
-                 "Positive" = "positive",
-                 "Negative" = "negative",
-                 "Total"    = "all_tests" )
 
-longer <- pivot_longer( overlaid,
-                        cols = c( Positive,
-                                  Negative,
-                                  Total),
+###############################################################################
+# Extract from the texas tibble the information needed for the multiple-line
+# plot.  Then compute the total tests for the day.
+###############################################################################
+
+temp <-
+   texas %>% 
+      select( date, positive, negative ) %>%
+         mutate( all_tests = positive + negative )
+
+##############################################################################
+# Get variable names from the tibble, change the first letter to a capital,
+# and replace the names in the temp tibble.
+##############################################################################
+
+vnames <- names( temp )
+vnames <- capitalize_strings( vnames )
+names( temp )  <- vnames
+
+
+##############################################################################
+# Convert wide-form to long-form data by pivot to longer function. 
+##############################################################################
+
+temp <- pivot_longer( temp,
+                        cols = c( "Positive",
+                                  "Negative",
+                                  "All_tests" ),
                         names_to = "tests" )
 
-ggplot( longer,
+ggplot(temp,
         aes( x = Date, y = value, color = tests)) +
-   geom_line()
+   geom_line() +
+   scale_color_manual ( values = c( "#D55E00", "#0072B2", "#000000" ))
 
 
 
