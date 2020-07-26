@@ -1,6 +1,13 @@
-# extract_plot_dates.R
+# determine_plot_period.R
 #
-extract_plot_dates <- 
+###############################################################################
+# Load required packages
+###############################################################################
+
+require( tidyverse )                        # I live in the tidyverse ...
+require( lubridate )                        # For advanced date processing ...
+
+determine_plot_period <- 
     function( data ){
         
         ################################################################

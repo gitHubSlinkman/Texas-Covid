@@ -19,20 +19,22 @@ require(tidyverse)                          # I live in the tidyverse ...
 require(lubridate)                          # For advanced date processing ...
 require( cowplot )                          # For academic plotting ...
 require(formattable)                        # For fixed decimal formatting ...
+require( tidyr )                            # To convert wide to longform data
 ```
  
 ## Load required_functions
 
 ```{r load_required functions}
 source('D:/R-Projects/TexasCovid/functions/get_texas_daily_covid_data.R')
+source('D:/R-Projects/TexasCovid/functions/determine_plot_period.R')
 source('D:/R-Projects/TexasCovid/functions/plot_ts.R')
- 
+
 ```
 
-## Set cowplot as the default theme
+## Prepare for plotting
 
 
-The default theme in ggplot produces a high ratio of ink to data points.  Therefore, I prefer to use the cowplot theme.  We loaded the theme in load packages chunk but we need to set itn here.
+The default theme in ggplot produces a high ratio of ink to data points.  Therefore, I prefer to use the cowplot theme.  We loaded the theme in load packages chunk but we need to set here.
 
 ```{r set_cowpllot_as_default}
 
@@ -54,6 +56,12 @@ We read the data from the Covid Project data.
 ###############################################################################
 
 texas <- get_texas_daily_covid_data()
+period <- determine_plot_period( texas )
+
+
+###############################################################################
+# Determine the plot period.
+###############################################################################
 ```
 
 ## Graphical Analysis of Tests
@@ -66,7 +74,7 @@ This section reports the analysis of the Texas testing results.
 
 Total number of people with confirmed OR probable COVID-19 reported by the state or territory (per the expanded CSTE case definition of April 5th, 2020 approved by the CDC). A confirmed case is a person who has a positive test result from an FDA approved diagnostic molecular test. A probable case is a person who either has presentable symptoms WITH epidemiological evidence or has BOTH a positive presumptive laboratory test AND also EITHER presentable symptoms OR epidemiological evidence. Epidemiological evidence refers either to close-proximity contact with a known case or travel history to an area with high disease incidence. According to the guidelines, FDA approved antibody and antigen tests are considered part of presumptive laboratory evidence.
 
-#### Positive plot
+#### Positive test plot
 
 ```{r plot_positive_cases}
 
@@ -77,7 +85,8 @@ Total number of people with confirmed OR probable COVID-19 reported by the state
 
 variable <- "positive"
 variable_name <- "Cummulative positive tests"
-title   <- "Texas nCovid-19 positive tests"
+title   <- paste( "Texas nCovid-19 positive tests\n",
+                  "From", period[1], "to", period[2] )
 
 plot_ts( texas,
          variable,
@@ -98,11 +107,69 @@ Individuals with a completed viral test that returned a negative result. For sta
 
 variable       <- "negative"
 variable_label <- "Cummulative negative tests"
-title          <- "Texas nCovid-19 negative tests"
+title   <- paste( "Texas nCovid-19 negative tests\n",
+                  "From", period[1], "to", period[2] )
  
 plot_ts( texas,
          variable,
          variable_name,
          title )
+```
+
+### All tests
+
+#### Definition of all tests
+
+All tests are the sum the positive tests and the negative test.  This is a derived value
+and is not in the original data.
+
+#### Cummaltive number of trests
+
+Note these value does not include pending tests.
+
+```{r plot_all_tests}
+
+texas <- 
+   texas %>% 
+      mutate( all_tests <- positive + negative )  %>% 
+         rename( all_tests = "all_tests <- positive + negative" )
+
+variable       <- "all_tests"
+variable_label <-"Cummulative tests"
+title   <- paste( "Texas nCovid-19 tests\n",
+                  "From", period[1], "to", period[2] )
+plot_ts( texas,
+         variable,
+         variable_name,
+         title )
+
+```
+
+###  Simultaneous overlaid plots of negative tests, positive tests, and all_tests
+
+```{r plot_all_tests}
+\
+overlaid <- 
+   texas %>% 
+      select( date, positive, negative, all_tests ) %>% 
+         rename( "Date" = "date",
+                 "Positive" = "positive",
+                 "Negative" = "negative",
+                 "Total"    = "all_tests" )
+
+longer <- pivot_longer( overlaid,
+                        cols = c( Positive,
+                                  Negative,
+                                  Total),
+                        names_to = "tests" )
+
+ggplot( longer,
+        aes( x = Date, y = value, color = tests)) +
+   geom_line()
+
+
+
+
+
 ```
 

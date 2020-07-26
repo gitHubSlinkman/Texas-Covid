@@ -39,7 +39,6 @@ plot_ts <-
                           date_labels = "%Y-%m") +
             scale_y_continuous( name = variable_label,
                                 breaks  = ticks,
-                                labels = y_labels,
-                                limits = c(0,y_max )) +
+                                labels = y_labels ) +
             ggtitle( title )
     }
