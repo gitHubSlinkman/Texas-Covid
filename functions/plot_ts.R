@@ -25,7 +25,6 @@ plot_ts <-
         
         ticks <- determine_y_axis_ticks( data, variable )
         y_max <- find_maximum_value( data, variable )
-        y_labels <- comma( ticks, 0  )
         
         
         ########################################################################
@@ -33,12 +32,8 @@ plot_ts <-
         ########################################################################
         
         ggplot( texas,
-                aes(x = date, y = positive )) +
+                aes(x = date, y = variable )) +
             geom_line() +
             scale_x_date( name = "Date",
-                          date_labels = "%Y-%m") +
-            scale_y_continuous( name = variable_label,
-                                breaks  = ticks,
-                                labels = y_labels ) +
-            ggtitle( title )
+                          date_labels = "%Y-%m" )
     }

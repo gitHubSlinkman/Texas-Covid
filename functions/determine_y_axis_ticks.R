@@ -52,7 +52,7 @@ determine_y_axis_ticks <-
         #######################################################################
         
         seq( from = from_value, 
-             by    =   by_value,
-             to    = to_value )
+             by   =  by_value,
+             to   = to_value  )
     }
         

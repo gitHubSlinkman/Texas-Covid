@@ -19,7 +19,7 @@ require(tidyverse)                          # I live in the tidyverse ...
 require(lubridate)                          # For advanced date processing ...
 require( cowplot )                          # For academic plotting ...
 require(formattable)                        # For fixed decimal formatting ...
-require( tidyr )                            # To convert wide to longform data
+require( tidyr )                            # To convert wide to long-form data
 ```
  
 ## Load required_functions
@@ -56,7 +56,7 @@ theme_set(theme_cowplot())
  
 cbbPalette <- c("#000000",  # black
                 "#E69F00",   # University of Texas orange
-                "#009E73",  # Green
+                "#009E73",   # Green
                 "#F0E442",   # Yellow
                 "#0072B2",   # Dark blue
                 "#D55E00",   # Firebrick red
@@ -130,16 +130,16 @@ Individuals with a completed viral test that returned a negative result. For sta
 
 #### Time series plot of negative tests
 
-```{r plot)negative_cases}
+```{r plot_negative_cases}
 
-variable       <- "negative"
-variable_label <- "Cummulative negative tests"
+variable <- "negative"
+variable_name <-  "Cummulative negative tests"
 title   <- paste( "Texas nCovid-19 negative tests\n",
                   "From", period[1], "to", period[2] )
  
 plot_ts( texas,
          variable,
-         variable_name,
+         variable_label,
          title )
 ```
 
@@ -202,17 +202,53 @@ names( temp )  <- vnames
 temp <- pivot_longer( temp,
                         cols = c( "Positive",
                                   "Negative",
-                                  "all" ),
-                        names_to = "tests" )
+                                  "All" ),
+                        names_to = "Tests" )
 
-ggplot(temp,
-        aes( x = Date, y = value, color = tests)) +
-   geom_line() +
-   scale_color_manual ( values = c( "#D55E00", "#0072B2", "#000000" ))
+this_title <- paste("Texas Cummulative nCovid-19 tests results",
+                    "\nfrom", period[1], "through", period[2] )
+                     
 
-
-
-
+ggplot( temp,
+        aes( x = Date, y = value, color = Tests)) +
+   geom_line( linesize =3 ) +
+   scale_x_date( name = "Date",
+                         date_labels = "%Y-%m" ) +
+   ylab( "Tests" ) + 
+   scale_color_manual ( values = c(  "#000000",      # All
+                                     "#009E73",      # Red
+                                     "#D55E00"  )) + # Blue
+   ggtitle( this_title )
 
 ```
 
+###  Percent positive tests
+
+```{r plot_percen_tpositive_tests}
+
+temp <- 
+   texas %>% 
+      mutate( percent = positive / ( positive + negative )) %>% 
+         select( date, percent )
+
+
+###############################################################################
+# Set column names for output
+###############################################################################
+
+names(temp)  <- capitalize_strings( names( temp))
+
+this_title  <- paste( "Texas nCovid-19 percent positive test\n",
+                      "from", period[1], "through", period[2] )
+                              
+
+ggplot( temp,
+        aes( x = Date, y = Percent )) +
+   geom_line() +
+   scale_x_date( name = "Date",
+                         date_labels = "%Y-%m" ) +
+    scale_y_continuous(labels = scales::percent_format(accuracy =1 )) +
+   ggtitle( this_title )
+
+   
+```
