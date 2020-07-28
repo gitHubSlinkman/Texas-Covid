@@ -25,6 +25,7 @@ plot_ts <-
         
         ticks <- determine_y_axis_ticks( data, variable )
         y_max <- find_maximum_value( data, variable )
+        these_limits = compute_date_plot_limits( data )
         
         
         ########################################################################
@@ -35,5 +36,6 @@ plot_ts <-
                 aes(x = date, y = variable )) +
             geom_line() +
             scale_x_date( name = "Date",
-                          date_labels = "%Y-%m" )
+                          date_labels = "%Y-%m",
+                          limits = c( limits = these_limits))
     }

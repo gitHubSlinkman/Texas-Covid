@@ -19,7 +19,8 @@ require(tidyverse)                          # I live in the tidyverse ...
 require(lubridate)                          # For advanced date processing ...
 require( cowplot )                          # For academic plotting ...
 require(formattable)                        # For fixed decimal formatting ...
-require( tidyr )                            # To convert wide to long-form data
+require( tidyr )                            # To convert wide to long-form ...
+require( scales )                           # For formatting date scales ...
 ```
  
 ## Load required_functions
@@ -29,6 +30,7 @@ source('D:/R-Projects/TexasCovid/functions/get_texas_daily_covid_data.R')
 source('D:/R-Projects/TexasCovid/functions/determine_plot_period.R')
 source('D:/R-Projects/TexasCovid/functions/plot_ts.R')
 source('D:/R-Projects/TexasCovid/functions/capitalize_strings.R')
+source('D:/R-Projects/TexasCovid/functions/compute_date_plot_limits.R')
  
 ```
 
@@ -84,6 +86,7 @@ We read the data from the Covid Project data.
 
 texas <- get_texas_daily_covid_data()
 period <- determine_plot_period( texas )
+x_limits <- compute_date_plot_limits( texas )
 
 
 ###############################################################################
@@ -110,16 +113,19 @@ Total number of people with confirmed OR probable COVID-19 reported by the state
 # third column.
 #####################################################################
 
-variable <- "positive"
-variable_name <- "Cummulative positive tests"
-title   <- paste( "Texas nCovid-19 positive tests\n",
-                  "From", period[1], "to", period[2] )
+this_title   <- paste( "Texas nCovid-19 positive tests\n",
+                       "From", period[1], "to", period[2] )
 
-plot_ts( texas,
-         variable,
-         variable_name,
-         title )
-   
+ggplot( texas,
+        aes( x = date, positive)) +
+   geom_line() +
+   scale_x_date( name = "Date",
+                 date_breaks = "1 month",
+                 date_labels = "%Y-%m" ) +
+   ylab( "Positive tests" ) +
+   theme(axis.text.x=element_text(angle=60, hjust=1)) +
+   ggtitle( this_title )
+     
 ```
 
 ### Negative test cases
@@ -132,15 +138,19 @@ Individuals with a completed viral test that returned a negative result. For sta
 
 ```{r plot_negative_cases}
 
-variable <- "negative"
-variable_name <-  "Cummulative negative tests"
-title   <- paste( "Texas nCovid-19 negative tests\n",
-                  "From", period[1], "to", period[2] )
- 
-plot_ts( texas,
-         variable,
-         variable_label,
-         title )
+this_title   <- paste( "Texas nCovid-19 negativee tests\n",
+                       "From", period[1], "to", period[2] )
+
+ggplot( texas,
+        aes( x = date,negative )) +
+   geom_line() +
+   scale_x_date( name = "Date",
+                 date_breaks = "1 month",
+                 date_labels = "%Y-%m" ) +
+   ylab( "Nositive tests" ) +
+   theme(axis.text.x=element_text(angle=60, hjust=1)) +
+   ggtitle( this_title )
+
 ```
 
 ### All tests
@@ -154,31 +164,35 @@ and is not in the original data.
 
 Note these value does not include pending tests.
 
-```{r plot_all}
+```{r plot_al_tests}
 
 texas <- 
    texas %>% 
-      mutate( all <- positive + negative )  
+      mutate( Tests  <- positive + negative )  
         
-variable       <- "all"
-variable_label <-"Cummulative tests"
-title   <- paste( "Texas nCovid-19 tests\n",
-                  "From", period[1], "to", period[2] )
-plot_ts( texas,
-         variable,
-         variable_name,
-         title )
+this_title   <- paste( "Texas nCovid-19 All tests with reported results\n",
+                        "From", period[1], "to", period[2] )
+
+ggplot( texas,
+        aes( x = date,negative )) +
+   geom_line() +
+   scale_x_date( name = "Date",
+                 date_breaks = "1 month",
+                 date_labels = "%Y-%m" ) +
+   ylab( "Tests with reported results" ) +
+   theme(axis.text.x=element_text(angle=60, hjust=1)) +
+   ggtitle( this_title )
 
 ```
 
 ###  Simultaneous overlaid plots of negative tests, positive tests, and all
 
-```{r plot_all}
+```{r plot_all_1}
 
-###############################################################################
+########################################################################################
 # Extract from the texas tibble the information needed for the multiple-line
 # plot.  Then compute the total tests for the day.
-###############################################################################
+########################################################################################
 
 temp <-
    texas %>% 
@@ -252,3 +266,21 @@ ggplot( temp,
 
    
 ```
+
+### Pending
+
+API field name: pending
+
+#### Definition
+
+Total number of viral tests that have not been completed as reported by the state or territory.
+
+This data is not available for the state of Texas.  Therefore, we can not present the time series plot of this data.
+
+### Hospitalized currently
+
+#### Definition
+
+Individuals who are currently hospitalized with COVID-19. Definitions vary by state / territory. Where possible, we report hospitalizations with confirmed or probable COVID-19 cases per the expanded [CSTE case definition](https://cdn.ymaws.com/www.cste.org/resource/resmgr/2020ps/Interim-20-ID-01_COVID-19.pdf) of April 5th, 2020 [approved by the CDC](https://wwwn.cdc.gov/nndss/conditions/coronavirus-disease-2019-covid-19/case-definition/2020/).
+
+#### Time series plot
