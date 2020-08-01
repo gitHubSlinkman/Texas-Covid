@@ -226,6 +226,7 @@ ggplot( temp,
    scale_color_manual ( values = c(  "#000000",      # All
                                      "#009E73",      # Red
                                      "#D55E00"  )) + # Blue
+    theme(axis.text.x=element_text(angle=60, hjust=1)) +
    ggtitle( this_title )
 
 ```
@@ -256,7 +257,8 @@ ggplot( temp,
    scale_x_date( name = "Date",
                          date_labels = "%Y-%m" ) +
     scale_y_continuous(labels = scales::percent_format(accuracy =1 )) +
-   ggtitle( this_title )
+    theme(axis.text.x=element_text(angle=60, hjust=1)) +
+    ggtitle( this_title )
 
    
 ```
@@ -295,6 +297,7 @@ ggplot( texas,
                        labels = y_labels,
                        breaks = y_labels ) +
    ggtitle( this_title ) +
+   theme(axis.text.x=element_text(angle=60, hjust=1)) +
    theme_cowplot()
 
 
@@ -302,5 +305,62 @@ ggplot( texas,
 
 ### Cumulative hospitalized
 
+#### DefinitionAPI field name: hospitalizedCumulative
+
+Total number of individuals who have ever been hospitalized with COVID-19. Definitions vary by state / territory. Where possible, we report hospitalizations with confirmed or probable COVID-19 cases per the expanded [CSTE case definition](https://cdn.ymaws.com/www.cste.org/resource/resmgr/2020ps/Interim-20-ID-01_COVID-19.pdf) of April 5th, 2020 [approved by the CDC](https://wwwn.cdc.gov/nndss/conditions/coronavirus-disease-2019-covid-19/case-definition/2020/).
+
+This  variable is not provided.  We can't compute it because given the data we have we can't avoid double counting individuals who are hospitalized for more than one day.
+
+#### Cummulative hospitalizations time series  
+
+Note that this data while present in the variable definitions is not provided in the data.  This is
+probably due to the problem of double counting patients.  We can't compute it with out counting a patient more than one given the data we are given.
+
+
+### In ICU currently
+
 #### Definition
+
+API field name: **inICUCurrently**
+
+Individuals who are currently hospitalized in the Intensive Care Unit with COVID-19. Definitions vary by state / territory. Where possible, we report patients in the ICU with confirmed or probable COVID-19 cases per the expanded CSTE case definition of April 5th, 2020 approved by the CDC.
+
+Note that this data was not recorded until very recently.  That is why the time series plot is relatively empty.
+
+
+#### Time series plot
+ 
+```{r plot_inIcuCurrently}
+
+
+this_title  <- paste( "Texas nCovid-19 IN ICU Currently\n",
+                      "from", period[1], "through", period[2] )
+
+y_labels = seq( from = 0, to = 4000, by= 500 )
+                              
+
+ggplot( texas,
+        aes( x = date, y =inIcuCurrently )) +
+   geom_line() +
+   scale_x_date( name = "Date",
+                         date_labels = "%Y-%m" ) +
+  ylab( "Current hospitalizations" ) +
+   ggtitle( this_title ) +
+   theme(axis.text.x=element_text(angle=60, hjust=1)) +
+   theme_cowplot()
+
+```
+ 
+### InIcuCumulative 
+
+#### Definition Cumulative hospitalized  
+
+API field name: Cumulative hospitalizations
+
+Total number of individuals who have ever been hospitalized with COVID-19. Definitions vary by state or territory. Where possible, we report hospitalizations with confirmed or probable COVID-19 cases per the expanded CSTE case definition of April 5th, 2020 approved by the CDC.
+
+#### Time series plot
+
+This information is not recorded by the Covid Tracking project for the state of texas because the Texas did not apparently record this data.  So there is not time series plot.
+
 
