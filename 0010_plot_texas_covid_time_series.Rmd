@@ -132,7 +132,7 @@ Individuals with a completed viral test that returned a negative result. For sta
 
 ```{r plot_negative_cases}
 
-this_title   <- paste( "Texas nCovid-19 negativee tests\n",
+this_title   <- paste( "Texas nCovid-19 negative tests\n",
                        "From", period[1], "to", period[2] )
 
 ggplot( texas,
@@ -333,7 +333,7 @@ Note that this data was not recorded until very recently.  That is why the time 
 ```{r plot_inIcuCurrently}
 
 
-this_title  <- paste( "Texas nCovid-19 IN ICU Currently\n",
+this_title  <- paste( "Texas nCovid-19 cases in ICU Currently\n",
                       "from", period[1], "through", period[2] )
 
 y_labels = seq( from = 0, to = 4000, by= 500 )
@@ -344,7 +344,8 @@ ggplot( texas,
    geom_line() +
    scale_x_date( name = "Date",
                          date_labels = "%Y-%m" ) +
-  ylab( "Current hospitalizations" ) +
+  scale_y_continuous( name = "Cases",
+                      limits = c(0, 4000)) +
    ggtitle( this_title ) +
    theme(axis.text.x=element_text(angle=60, hjust=1)) +
    theme_cowplot()
@@ -364,3 +365,27 @@ Total number of individuals who have ever been hospitalized with COVID-19. Defin
 This information is not recorded by the Covid Tracking project for the state of texas because the Texas did not apparently record this data.  So there is not time series plot.
 
 
+### Patients currently on ventalator 
+
+Currently on ventilator
+
+API field name: $onVentilatorCurrently$
+
+#### Definition
+
+Individuals who are currently hospitalized under advanced ventilation with COVID-19. Definitions vary by state / territory. Where possible, we report patients on ventilation with confirmed or probable COVID-19 cases per the expanded CSTE case definition of April 5th, 2020 approved by the CDC.
+
+The statistic is not present in the data fro the state of Texas.  There is no time series plot for this statistic.
+
+
+### Cumulative on ventilator  
+
+#### Definition
+
+API field name: $onVentilatorCumulative$
+
+Total number of individuals who have ever been hospitalized under advanced ventilation with COVID-19. Definitions vary by state / territory. Where possible, we report patients on ventilation with confirmed or probable COVID-19 cases per the expanded CSTE case definition of April 5th, 2020 approved by the CDC.
+
+##### Time series plot
+
+Texas does nor report this data so no plots are drawn for it.
