@@ -4,30 +4,24 @@
 # returns the data.
 ###############################################################################
 
-require( tidyverse )                             # I live in the tidyverse.
-require( lubridate )                             # For date processing.
+require( tidyverse )                             # I live in the tidyverse ...
+require( readr )                                 # Tidyverse read ...
+require( lubridate )                             # For date processing ...
            
-get_texas_daily_covid_data <- 
+get_us_county_cases_and_deaths <- 
     function()
     {
         #######################################################################
         # Specify organization and file urls and then build complete url
         # used to read file
         #######################################################################
-        ORGANIZATION <- "https://covidtracking.com"   # Path to project.
-        TEXAS        <- "api/v1/states/tx/daily.csv"  # Data file name
         
-        URL        <-  file.path( ORGANIZATION,
-                                  TEXAS )
+        URL <- "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+        
         #######################################################################
-        # Read file and return
+        # Read file
         #######################################################################
         
-        texas <- read_csv( URL )
-        
-        texas <- 
-            texas %>% 
-                mutate( date = date(ymd(date)))
-        texas 
+        read_csv(URL)
     }
 

@@ -1,0 +1,103 @@
+---
+title: "texas_county_covid_data"
+author: "The Covid Project and Craig Slinkman"
+date: "8/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+This document shows how to access the county covid deaths provided by the New
+York Times via their [GitHub Covid-site](https://github.com/nytimes/covid-19-data).
+
+We start by loading the R packages and written functions we need to produce this
+document.
+
+```{r load_pacakges}
+
+require(tidyverse)                          # I live in the tidyverse ....
+require(lubridate)                          # For advanced date processing ...
+```
+
+Now we load the required functions.
+
+```{r load_functions}
+
+source('D:/R-Projects/TexasCovid/functions/get_us_county_cases_and_deaths.R')
+source('D:/R-Projects/TexasCovid/functions/get_us_counties_population.R')
+
+```
+
+
+## Reading the United States data.
+function
+We access the United States data below:
+
+```{r read_county_cases_and_deaths}
+
+###############################################################################
+# We read the US county data case and deaths data and store the data in the
+# US tibble.
+###############################################################################
+
+us <- get_us_county_cases_and_deaths()
+
+###############################################################################
+# We display the the first rows of the us tibble ...
+###############################################################################
+
+us
+
+```
+
+### Extracting the county data from the US county data
+
+We use dplyr to wrangle our data.  We first extract the Texas data from the
+the United states data.
+ 
+ 
+```{r extract_the_tesas_data}
+
+###############################################################################
+# We use the dplyr function filter to create a tibble for Texas counties.  We
+# The display the first few rows of this tibble.
+###############################################################################
+
+texas <- 
+    us %>% 
+        filter(  == "Texas" )
+
+texas
+
+```
+
+### We get the county plopulation for all United States counties
+
+We would like to be able to compute the number of cases per 1,000 for each county.  I have loaded the
+estimated population created by the US Census Bureau.  This file is stored in the data sub-directory to this project.  The original data file is from The United States Census Bureau and is named co-est2019-alldata.csv and can be found [here](https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/).  We load and display this file below.
+
+```{r load_us_county_population}
+
+###############################################################################
+# We load the estimated population county data fro the United States.
+###############################################################################
+
+counties <- get_us_counties_population()
+
+counties
+
+##############################################################################
+# For this analysis we want only want the fips code and the 2019 
+# population for the state of texas.  We use dplyr to wrangle tid data.
+##############################################################################
+
+counties <- 
+    census  %>% 
+        filter( STATE == "Texas")
+
+
+```
+
