@@ -123,9 +123,9 @@ tx_counties
 ## Join the covid tibble to the tx_county tibble ny count name
 
 ```{r join_covid_to_tx_counties}
-tx_covid <- 
-    left_join( tx_covid,
-               tx_counties )
-tx_covid
+# tx_covid <- 
+#     left_join( tx_covid,
+#                tx_counties )
+# tx_covid
 ```
 
