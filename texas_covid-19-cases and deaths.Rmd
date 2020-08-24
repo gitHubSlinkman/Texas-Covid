@@ -20,6 +20,7 @@ document.
 
 require(tidyverse)                          # I live in the tidyverse ....
 require(lubridate)                          # For advanced date processing ...
+require( stringr )                          # For string processing
 ```
 
 Now we load the required functions.
@@ -28,76 +29,103 @@ Now we load the required functions.
 
 source('D:/R-Projects/TexasCovid/functions/get_us_county_cases_and_deaths.R')
 source('D:/R-Projects/TexasCovid/functions/get_us_counties_population.R')
+source('D:/R-Projects/TexasCovid/functions/get_texas_fips_codes.R')
 
 ```
 
 
-## Reading the United States data.
+## Reading the United Statescovid data
 function
-We access the United States data below:
+We access the United States Covid data below:
 
-```{r read_county_cases_and_deaths}
+```{r read_county_covid_data}
 
 ###############################################################################
 # We read the US county data case and deaths data and store the data in the
 # US tibble.
 ###############################################################################
 
-us <- get_us_county_cases_and_deaths()
-
-###############################################################################
-# We display the the first rows of the us tibble ...
-###############################################################################
-
-us
-
+us_covid <- get_us_county_cases_and_deaths()      # Read NY Times covid data.
+us_covid                                          # Display tibble
 ```
 
-### Extracting the county data from the US county data
+# We extract the Texas state data from the **us_coivid" tibble
 
-We use dplyr to wrangle our data.  We first extract the Texas data from the
-the United states data.
- 
- 
-```{r extract_the_tesas_data}
-
-###############################################################################
-# We use the dplyr function filter to create a tibble for Texas counties.  We
-# The display the first few rows of this tibble.
-###############################################################################
-
-texas <- 
-    us %>% 
-        filter(  == "Texas" )
-
-texas
-
+```{r extract_data}
+tx_covid <- 
+    us_covid %>%
+        filter( state == "Texas" )
+tx_covid
 ```
 
-### We get the county plopulation for all United States counties
+## Load the United States Census data
 
-We would like to be able to compute the number of cases per 1,000 for each county.  I have loaded the
-estimated population created by the US Census Bureau.  This file is stored in the data sub-directory to this project.  The original data file is from The United States Census Bureau and is named co-est2019-alldata.csv and can be found [here](https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/).  We load and display this file below.
+```{r get_us_census_dara}
+us_census <- get_us_counties_population()
+us_census
+```
 
-```{r load_us_county_population}
+## Extract Texas census data from US census data
 
-###############################################################################
-# We load the estimated population county data fro the United States.
-###############################################################################
+```{r extract_texas}
+tx_census <- 
+    us_census %>% 
+        filter( STNAME == "Texas" )
+tx_census
+```
 
-counties <- get_us_counties_population()
+## Keep oonly county rows 
 
-counties
+The file design of the census data contains nore than one l3evel of goverment.  We only want to keep the county data.  So well extract the texas county data
 
-##############################################################################
-# For this analysis we want only want the fips code and the 2019 
-# population for the state of texas.  We use dplyr to wrangle tid data.
-##############################################################################
+```{r extract_counties}
+n <- dim( tx_census)[1]
+tx_counties <- tx_census[2:n,]
+tx_counties
+```
 
-counties <- 
-    census  %>% 
-        filter( STATE == "Texas")
+## Keep only required columns 
 
+```{r keep_required_data}
+tx_counties <- 
+    tx_counties %>% 
+        select( CTYNAME,
+                CENSUS2010POP,
+                POPESTIMATE2019 )
+tx_counties
+```
 
+## Rename columns
+We rename the columns so that follow Hadley Wickham's tidyverse naming cponventiaon that I use.
+
+```{r rename_columns}
+tx_counties <- 
+    tx_counties %>% 
+        rename( "county"                    = "CTYNAME",
+                "census_population_2010"    = "CENSUS2010POP",
+                "estimated_population_2019" = "POPESTIMATE2019" )
+tx_counties   
+```
+
+## Estimat population for 2019
+We estimate the 2020 population for each county by computing the 9 year grown that and multiplying that by the estimated 2019 population.
+
+```{r Estimate_2020_populatoion}
+tx_counties <-  
+    tx_counties %>% 
+        mutate( growth <- ( estimated_population_2019 / 
+                            census_population_2010 )^(1/9),
+                estimated_population_2020 <- 
+                    growth * estimated_population_2019 )
+tx_counties
+```
+
+## Join the covid tibble to the tx_county tibble ny count name
+
+```{r join_covid_to_tx_counties}
+tx_covid <- 
+    left_join( tx_covid,
+               tx_counties )
+tx_covid
 ```
 
