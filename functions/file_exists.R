@@ -1,7 +1,7 @@
 # files_exists.R
 
 file_exists <- 
-    function( files_name )
+    function( file_name )
     {
         
         #######################################################################
